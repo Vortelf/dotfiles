@@ -6,6 +6,10 @@ tmp = Hash.new
 
 covered = "False"
 
+if ARGV.length < 2
+  abort("Not Enoug Arguments")
+end
+
 CSV.foreach(ARGV[0]) do |row|
   covered = "False"
   tmp['income'] = row[1].to_i
