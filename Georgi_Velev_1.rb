@@ -25,7 +25,7 @@ end
 
 CSV.open(ARGV[0].split(/\//).last.split('.').first+"_result.csv","w") do |csv|
 
-    people.sort_by { |person, info| info[:'total'] }
+    people.sort_by { |person, info| info[:total] }
     people.each do |person , info|
   			csv << [person, info['covered'], info['total']]
     end
