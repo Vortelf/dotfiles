@@ -1,0 +1,57 @@
+#!/bin/bash
+
+#Xresources Colors 
+
+BLACK=$(xrdb -query | grep "*.color0:" | awk '{print$2}')
+LIGHTBLACK=$(xrdb -query | grep "*.color8:" | awk '{print$2}')
+
+RED=$(xrdb -query | grep "*.color1:" | awk '{print$2}')
+LIGHTRED=$(xrdb -query | grep "*.color9:" | awk '{print$2}')
+
+GREEN=$(xrdb -query | grep "*.color2:" | awk '{print$2}')
+LIGHTGREEN=$(xrdb -query | grep "*.color10:" | awk '{print$2}')
+
+YELLOW=$(xrdb -query | grep "*.color3:" | awk '{print$2}')
+LIGHTYELLOW=$(xrdb -query | grep "*.color11:" | awk '{print$2}')
+
+BLUE=$(xrdb -query | grep "*.color4:" | awk '{print$2}')
+LIGHTBLUE=$(xrdb -query | grep "*.color12:" | awk '{print$2}')
+
+MAGENTA=$(xrdb -query | grep "*.color5:" | awk '{print$2}')
+LIGHTMAGENTA=$(xrdb -query | grep "*.color13:" | awk '{print$2}')
+
+CYAN=$(xrdb -query | grep "*.color6:" | awk '{print$2}')
+LIGHTCYAN=$(xrdb -query | grep "*.color14:" | awk '{print$2}')
+
+WHITE=$(xrdb -query | grep "*.color7:" | awk '{print$2}')
+LIGHTWHITE=$(xrdb -query | grep "*.color15:" | awk '{print$2}')
+
+FOREGROUND=$(xrdb -query | grep "*.foreground:" | awk '{print$2}')
+BACKGROUND=$(xrdb -query | grep "*.background:" | awk '{print$2}')
+
+#Xresources Fonts
+
+FONT=$(xrdb -query | grep "*.font" | awk '{print$2}')
+BOLDFONT=$(xrdb -query | grep "*.boldFont" | awk '{print$2}')
+
+# ---------------------------------------------------------------------------------------------------------------------------
+
+#Panel Settings
+
+PANELFONT=-*-terminus-medium-r-normal-*-12-*-*-*-*-*-*-*
+PANELFONT_BOLD=-*-terminus-bold-r-normal-*-12-*-*-*-*-*-*-*
+ICONFONT="FontAwesome:size=11"
+
+COLOR_FG=$WHITE
+COLOR_BG=$BACKGROUND
+
+OFFSET=3
+
+PANEL_HEIGHT=15
+PANEL_WIDTH=$(( 1366 - ( 2 * $OFFSET ) ))
+
+GAP=5
+BORDER=3
+BORDER_COLOR=#121212
+
+BG_PANEL_HEIGHT=$(( $PANEL_HEIGHT + ( 2 * $OFFSET ) ))

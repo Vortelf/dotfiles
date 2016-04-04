@@ -1,0 +1,51 @@
+#!/bin/bash
+
+
+#Popup display for weather information.
+
+source ~/.scripts/source
+DIRNAME=$(cd `dirname $0` && pwd)
+xpos=$(xdotool getmouselocation --shell | head -n1 | awk -F"=" '{print$2}')
+weather_pop(){
+  
+  #Check to see if the first value of the "tempLabel" array is a Low or High.
+  #If it is a low, clear the value for the high, set the low.
+  if [[ "$(cat $DIRNAME/.weather | jq '.time.tempLabel[0]' | tr -d '"')" = "Low" ]]; then
+    high="--"
+    low=$(cat $DIRNAME/.weather | jq '.data.temperature[0]' | tr -d '"')
+  else
+    high=$(cat $DIRNAME/.weather | jq '.data.temperature[0]' | tr -d '"')
+    low=$(cat $DIRNAME/.weather | jq '.data.temperature[1]' | tr -d '"')
+  fi
+  
+  #Grab values from the .weather file
+  current_cond=$(cat $DIRNAME/.weather | jq '.currentobservation.Weather' | tr -d '"')
+  winds=$(cat $DIRNAME/.weather | jq '.currentobservation.Winds' | tr -d '"')
+  windchill=$(cat $DIRNAME/.weather | jq '.currentobservation.WindChill' | tr -d '"')
+  temp=$(cat $DIRNAME/.weather | jq '.currentobservation.Temp' | tr -d '"')
+  
+  #Draw info onto dzen
+  echo "^bg($YELLOW)  ^fg($BLACK)Weather Report^fg()  ^bg()"
+  echo "^ib(1)^pa(+10)^fg($BLACK)^r(280x1)^fg()"
+  echo "^pa(+15)^fg($BLUE)Temperature^fg() $temp F"
+  echo "^pa(+15)^fg($YELLOW)Condition^fg() $current_cond ^pa(+200)^fg(#f92671)High ^fg($BLACK)^r(1x15) ^fg($LIGHTBLUE)Low^fg()"
+  echo "^pa(+15)^fg($MAGENTA)Winds^fg() $winds MPH ^pa(+205)$high ^pa(+230)^fg($BLACK)^r(1x15)^fg()^p(+8)$low"
+  echo "^pa(+15)^fg($GREEN)Windchill^fg() $windchill"
+  echo "^ib(1)^pa(+10)^fg($BLACK)^r(280x1)^fg()"
+  echo "^ib(1)^pa(+10)^fg($BLACK)^r(280x15)^fg()^pa(+100)Extended Report"
+  
+  #While loop to store the 2-week forcast into an array.
+  num=$(cat $DIRNAME/.weather | jq '.time.startPeriodName[]' | wc -l)
+  n=0
+  until [[ "$n" == "$num" ]]; do
+    condition[$n]=$(cat $DIRNAME/.weather | jq '.data.weather['$n']' | tr -d '"')
+    day[$n]=$(cat $DIRNAME/.weather | jq '.time.startPeriodName['$n']' | tr -d '"')
+    echo -e "^ib(1)^fg($BLACK)^pa(+10;+0)^ro(280x15)^pa(+130:+0)^r(1x15)^fg()^pa(+15;+2)${day[$n]}^pa(+135) ${condition[$n]}"
+    n=$(( n + 1 ))
+  done 
+}
+
+num=$(cat $DIRNAME/.weather | jq '.time.startPeriodName[]' | wc -l)
+lines=$(( $num + 8 ))
+echo "$(weather_pop)"| dzen2 -x $xpos -y '20' -l $lines -w '300' -h '15' -p -ta l -e 'onstart=uncollapse,grabkeys;key_Escape=ungrabkeys,exit'
+

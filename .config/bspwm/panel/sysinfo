@@ -1,0 +1,128 @@
+#!/bin/bash
+
+#Script to port system info to the top bar
+#If you want to use this, find the 'weather' function and enter
+#in the latitude and longitude of your location into the wget expression.
+
+# 'jq' (json parser) is needed to execute this script.
+
+. ~/.scripts/source
+DIRNAME=$(cd `dirname $0` && pwd)
+
+#Functions
+
+clock() {
+	month=$(date +%b)
+	day=$(date +%e)
+	time=$(date +%I:%M)
+	echo -e "%{B#121212}%{F#171717}\uE1AB%{F-}%{B#171717} %{F$WHITE}%{T2}$month%{T1}$day %{T2}$time%{T1} %{B-}%{F-}"
+}
+
+wifi() {
+	qual=$(iwconfig wlp3s0 | grep 'Link Quality=' | awk '{gsub(/[=/]/," "); print $3}')
+	max=$(iwconfig wlp3s0 | grep 'Link Quality=' | awk '{gsub(/[=/]/," "); print $4}')
+	quality=$(( $qual * 100 / $max ))
+	essid=$(iwconfig wlp3s0 | grep "ESSID:" | awk -F":" '{gsub(/"/,"");print$2}')
+	if [[ "$quality" -ge 75 ]]; then
+		icon="\uE222"
+	elif [[ "$quality" -ge 50 && "$quality" -lt 75 ]]; then
+		icon="\uE221"
+	elif [[ "$quality" -ge 25 && "$quality" -lt 50 ]]; then
+		icon="\uE220"
+	else
+		icon="\uE21F"
+	fi
+	echo -e "%{B#0D0D0D}%{F#121212}\uE1AB%{F-}%{B#121212} %{F$WHITE}$icon $essid%{B-}%{F-}"
+}
+
+battery() {
+	perc=$(acpi | awk '{print$4}' | sed -e 's/%//g' -e 's/,//g')
+	if [[ "$perc" -le 45 ]]; then
+		icon="\uE1FD"
+		info="$perc %{F$RED}\uE077 %{F$LIGHTRED}Please plug me in!%{F-}"
+	elif [[ "$perc" -gt 45 && "$perc" -le 75 ]]; then
+		icon="\uE1FE"
+		info=$perc
+	else
+		icon="\uE1FF"
+		info=$perc
+	fi
+	echo -e "%{B#000000}%{F#0D0D0D}\uE1AB%{F-}%{B#0D0D0D} %{F$WHITE}$icon $info%{F-}%{B-}"
+}
+
+
+
+# ------------------------------------------------------------------------------------------------------------------
+
+mpd() {
+	artist=$(mpc -f %artist% | head -n 1)
+	song=$(mpc -f %title% | head -n 1)
+	status=$(mpc | awk 'NR==2{print$1}')
+	if [[ "$status" == "[playing]" ]]; then
+		color=$GREEN
+		toggle="\uE09B"
+	elif [[ "$status" == "[paused]" ]]; then
+		color=$LIGHTYELLOW
+		toggle="\uE09A"
+	else
+		toggle=\uE09A
+		color=$RED
+		artist="Nothing"
+		song="Playing"
+	fi
+	echo -e "%{B#171717} %{F$color}\uE05C %{F$color}%{T2}%{A:mpc stop:}$artist%{A} %{T1}%{F$WHITE}%{A:mpc prev:}\uE096%{A} %{A:mpc toggle:}$song%{A} %{A:mpc next:}\uE09C%{A} %{B#121212}%{F#171717}\uE1A9%{F-}%{B-}"
+}
+
+mailbox() {
+	#TODO: THIS
+	echo -e "%{B#121212}%{F$WHITE} \uE072 18 %{F$YELLOW}6\uE077 %{B#0D0D0D}%{F#121212}\uE1A9%{F-}%{B-}"
+}
+
+weather() {
+  $(wget http://forecast.weather.gov/MapClick.php\?lat\=YOUR_LAT_HERE\&lon\=YOUR_LONG_HERE\=\&FcstType\=json -O $DIRNAME/.weather)
+  temp=$(cat $DIRNAME/.weather | jq '.currentobservation.Temp' | tr -d '"')
+  condition=$(cat $DIRNAME/.weather | jq '.currentobservation.Weather' | tr -d '"')
+  shopt -s nocasematch 
+  case $condition in
+    *sun*)
+      icon="\uE234"
+      ;;
+    *rain*)
+      icon="\uE22F"
+      ;;
+    *cloud*|*overcast*)
+      icon="\uE22B"
+      ;;
+    *snow*)
+      icon="\uE22E"
+      ;;
+    *wind*)
+      icon="\uE235"
+      ;;
+    *)
+      ;;
+  esac
+	echo -e "%{A:weather_applet:}%{B#0D0D0D}%{F$WHITE} $temp F $icon %{B#000000}%{F#0D0D0D}\uE1A9%{F-}%{B-}%{A}"
+}
+	
+
+#While Loops
+
+#Right Side
+while :; do
+	echo 'R'"%{A:sysinfo_applet:}$(battery)$(wifi)$(clock)%{A}"  > "$PANEL_FIFO"
+	sleep 60
+
+done &
+
+#Music
+while :; do
+	echo 'M'"$(mpd)" > "$PANEL_FIFO"
+	sleep 1
+done & 
+
+#Mailbox and Weather
+while :; do
+  echo 'U'"$(mailbox)$(weather)" > "$PANEL_FIFO"
+  sleep 600
+done &

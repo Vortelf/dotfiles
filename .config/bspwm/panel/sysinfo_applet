@@ -1,0 +1,58 @@
+#!/bin/bash
+
+#Popup display for system information.
+
+source ~/.scripts/source
+DIRNAME=$(cd `dirname $0` && pwd)
+
+if [[ -e "$DIRNAME/.updates" ]]; then
+  rm $DIRNAME/.updates
+fi
+
+sudo pacman -Sup >> $DIRNAME/.updates
+
+sysinfo_pop(){
+
+  echo "^bg($YELLOW)  ^fg($BLACK)System Info^fg()  ^bg()"
+  
+  #Disk space
+  disk2_perc=$(df | grep sda5 | awk '{gsub(/%/,"");print$5}')
+  disk1_perc=$(df | grep sda3 | awk '{gsub(/%/,"");print$5}')
+
+  echo "^pa(+10)^fg($BLACK)^r(150x1)^fg()"
+  echo "$disk1_perc" | gdbar -l "^pa(+15)^fg($LIGHTBLUE)^i($DIRNAME/icons/diskette.xbm) ^fg($LIGHTBLACK)/^fg()^pa(+70)" -w '85' -h '2' -fg $WHITE -bg $LIGHTBLACK
+  echo "$disk2_perc" | gdbar -l "^pa(+15)^fg($BLUE)^i($DIRNAME/icons/diskette.xbm) ^fg($LIGHTBLACK)/home^fg()^pa(+70)" -w '85' -h '2' -fg $WHITE -bg $LIGHTBLACK
+  
+  #Battery
+  status=$(acpi | awk '{print$3}' | tr -d ',')
+  perc=$(acpi | awk '{print$4}' | tr -d '%,')
+  if [[ "$status" = "Discharging" ]]; then
+    timeleft=$(acpi | awk '{print$5}' | tr -d '%,')
+    hours="^fg($LIGHTBLUE)$(echo "$timeleft" | cut -d: -f1)^fg($LIGHTBLACK) hr"
+    min="^fg($BLUE)$(echo "$timeleft" | cut -d: -f2)^fg($LIGHTBLACK) min"
+  else
+    timeleft=""
+    hours="--"
+    min=""
+  fi
+
+  echo "^pa(+10)^fg($BLACK)^r(150x1)^fg()"
+  echo "$perc" | gdbar -l "^pa(+15)^fg($YELLOW)^i($DIRNAME/icons/bat_full_01.xbm) ^fg($LIGHTBLACK)$perc^fg()^pa(+55)" -w '100' -h '2' -fg $WHITE -bg $LIGHTBLACK
+  echo "^pa(+15)^fg($LIGHTYELLOW)Status^fg() $status"
+  echo "^pa(+15)^fg($YELLOW)Time^fg() $hours $min"
+  
+  #Updates
+  echo "^pa(+10)^fg($BLACK)^r(150x1)^fg()"
+  echo "^ib(1)^pa(+10)^fg($BLACK)^ro(150x15)^pa(+15)^fg($LIGHTRED)Core^fg() ^pa(+100)^fg($BLACK)^r(1x15)^fg()^p(+40)$(grep core $DIRNAME/.updates | wc -l)"
+  echo "^ib(1)^pa(+10)^fg($BLACK)^ro(150x15)^pa(+15)^fg($LIGHTRED)Community^fg() ^pa(+100)^fg($BLACK)^r(1x15)^fg()^p(+40)$(grep community $DIRNAME/.updates | wc -l)"
+  echo "^ib(1)^pa(+10)^fg($BLACK)^ro(150x15)^pa(+15)^fg($LIGHTRED)Extra^fg() ^pa(+100)^fg($BLACK)^r(1x15)^fg()^p(+40)$(grep extra $DIRNAME/.updates | wc -l)"
+  echo "^ib(1)^pa(+10)^fg($BLACK)^ro(150x15)^pa(+15)^fg($LIGHTRED)Multilib^fg() ^pa(+100)^fg($BLACK)^r(1x15)^fg()^p(+40)$(grep multilib $DIRNAME/.updates | wc -l)"
+  echo ""
+  echo "^ca(1,urxvt -e sudo pacman -Syu)^ib(1)^pa(+10)^fg(#0D0D0D)^r(150x15)^pa(+10)^fg($LIGHTBLUE)^ro(150x15)^pa(+40)CLICK TO UPDATE^ca()"
+ 
+ #Buttons
+ echo "^pa(+10)^fg($BLACK)^r(150x1)^fg()"
+ echo "^ca(1,~/.scripts/log_shut_dialog logout_timer)^ib(1)^pa(+10)^fg(#0D0D0D)^r(65x15)^pa(+10)^fg($YELLOW)^ro(65x15)^pa(+25)LOGOUT^fg()^ca() ^ca(1,~/.scripts/log_shut_dialog shutdown_timer)^ib(1)^pa(+95)^fg(#0D0D0D)^r(65x15)^p(-65)^fg($RED)^ro(65x15)^p(-56)SHUTDOWN^fg()^ca()"
+}
+
+echo "$(sysinfo_pop)" | dzen2 -x '1191' -y '20' -h '15' -w '170' -l 17 -e 'onstart=uncollapse,grabkeys;key_Escape=ungrabkeys,exit' -p  -ta l 
