@@ -1,0 +1,3 @@
+exec sxhkd &
+xset +fp /usr/share/fonts/ &
+xsetroot -cursor_name left_ptr &

@@ -1,0 +1,2 @@
+urxvt -e zsh -ic clock &(sleep 0.15s && xdo resize -w 210 -h 77 && xdo move -x 5 -y 50)
+urxvt -e zsh -ic ~/vote.sh &(sleep 0.2 && xdo resize -w 77 -h 77 && xdo move -x 215 -y 50)
