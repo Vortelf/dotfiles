@@ -1,1 +1,153 @@
+##########################
+#For bspwm itself
+##########################
 
+# Rotates my tree
+super + r
+    bspc desktop -R 90
+
+# Closes focused window
+super + q
+    bspc node -c
+
+# Flips leaves horizontally
+super + c
+    bspc desktop -F horizontal
+
+# Flips leaves vertically
+super + v
+    bspc desktop -F vertical
+
+# Trying to figure out what this does
+super + t
+    bspc desktop -l next
+
+# Balances the tree
+super + b
+    bspc desktop -B
+
+# Toggles floating or fullscreen
+super + {e,f}
+    bspc node -t {~floating,fullscreen}
+
+# Toggles between last tag
+super + {grave,Tab}
+    bspc {node,desktop} -f last
+
+super + apostrophe
+    bspc node -s last
+
+super + {o,i}
+    bspc control --record-history off; \
+    bspc node {older,newer} -f; \
+    bspc control --record-history on
+
+# Move current window into the biggest panel
+super + m
+    bspc node -s biggest
+
+# Move current floating window into presel area
+super + p
+    bspc node -t floating -w last.manual
+
+# Lock focused window's size.
+shift + alt + l
+    bspc node -t private
+
+# Move floating windows
+alt + {Left,Right,Up,Down}
+    xdo move {-x -5,-x +5,-y -5,-y +5}
+
+# Resize floating windows
+alt + shift + {Left,Right,Up,Down}
+    xdo resize {-w -5,-w +5,-h -5,-h +5}
+
+# Focus on floating / tiled
+alt + {e,w}
+    bspc node -f {next.floating,next.tiled}
+
+alt + Tab
+    bspc node -f next
+
+# Moves window to (which ever direction)
+super + {_,shift + }{h,j,k,l}
+    bspc node -{f,s} {left,down,up,right}
+
+super + ctrl + {h,j,k,l}
+    bspc node -p {left,down,up,right}
+
+super + ctrl + {_,shift + }space
+    bspc {node -p cancel,desktop -c}
+
+super + alt + {h,j,k,l}
+	bspc node -e {left -10,down +10,up -10,right +10}
+
+super + alt + shift + {h,j,k,l}
+	bspc node -e {right -10,up +10,down -10,left +10}
+
+super + ctrl + {1-9}
+    bspc node -r 0.{1-9}
+
+super + {_,shift + }{1-9,0}
+    bspc {desktop -f,node -d} ^{1-9,10}
+
+##########################
+#Launcher
+##########################
+
+alt + shift + t
+	urxvt
+
+super + s
+	dmenu_run -b -h 24 -l 10 -w 500 -x 433 -y 234 -nb '#101010' -sb '#8c8c8a'
+
+alt + shift + r
+    urxvt -e ranger
+
+alt + shift + a
+    chromium
+
+alt + shift + p
+    urxvt -e ncmpcpp &(sleep 0.1s && xdo resize -w 900 -h 300 && xdo move -y 440 -x 5)
+
+# make sxhkd reload its configuration files:
+super + Escape
+	pkill -USR1 -x sxhkd
+
+# keyboard layout
+super + space
+	bash ~/scripts/keymap_layout.sh
+
+#F12
+#	xdotool search --onlyvisible --classname urxvt windowunmap \
+#	|| xdotool search --classname urxvt windowmap \
+#	|| windowsize 200 100 \
+#	|| st -c urxvt -g 100x40+46 & 
+
+alt + shift + w
+	urxvt -e zsh -ic clock &(sleep 0.15s && xdo resize -w 210 -h 77 && xdo move -x 5 -y 50)
+
+XF86AudioLowerVolume
+	amixer set Master 2%-
+
+XF86AudioRaiseVolume
+	amixer set Master 2%+
+
+XF86AudioMute
+	amixer -D pulse set Master 1+ toggle
+
+XF86AudioPlay
+	mpc toggle
+
+XF86AudioPrev
+	mpc prev
+
+XF86AudioNext
+	mpc next
+
+
+#XF86PowerOff
+#	bash ~/scripts/poweroff.sh
+
+Print
+    scrot; notify-send "Screenshot taken"
