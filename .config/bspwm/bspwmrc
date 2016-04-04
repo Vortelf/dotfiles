@@ -1,0 +1,54 @@
+#! /bin/sh
+
+bspc monitor -d Home Web Note Paint 5 6 7 8 9 0 bspc query -T
+
+# bspc monitor -d 1 2 3 4 5 6 7 8 9 0 bspc query -T
+
+desktop_config() {
+	bspc config $1 $2
+	for M in $(bspc query -M); do
+		bspc config -m $M $1 $2
+	done
+}
+
+desktop_config border_width		5	
+desktop_config window_gap		5
+
+bspc config window_gap			0
+bspc config top_padding			24
+bspc config right_padding		-1
+bspc config bottom_padding		21
+bspc config left_padding		-1
+bspc config split_ratio			0.50
+
+bspc config borderless_monocle		true
+bspc config gapless_monocle		true
+bspc config focus_by_distance		true
+bspc config focus_follows_pointer	true
+
+bspc config normal_border_color			"#8c8c8a"
+bspc config active_border_color			"#2d2d2d"
+bspc config focused_border_color		"#2d2d2d"
+bspc config presel_border_color			"#f3f3f3"
+bspc config urgent_border_color			"#f3f3f3"
+bspc config focused_locked_border_color		"#f3f3f3"
+
+bspc rule -a urxvt floating=on
+bspc rule -a krita floating=on desktop=Paint
+bspc rule -a Chromium desktop=Web border=off
+bspc rule -a feh floating=on
+bspc rule -a nemo floating=on
+bspc rule -a subl3 desktop=Note border=off
+bspc rule -a skype floating=on center=no 
+
+
+# set background
+bash ~/.config/bspwm/autostart
+feh --bg-scale /home/vortelf/Pictures/I65A7G8.jpg
+xrdb -load ~/.Xresources
+urxvtd &
+urxvt &
+thttpd -p 1724 -d ~/.startpage
+mpd
+tint2 &
+bash ~/scripts/panel/load_panel.sh
